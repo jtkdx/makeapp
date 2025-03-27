@@ -1,9 +1,27 @@
-﻿-- アプリケーションファイルのあるフォルダのパスを取得
+-- アプリケーションファイルのあるパスを取得
 set appPath to (path to me as string)
-set appFolderPath to (POSIX path of (container of (appPath as alias)))
+display dialog "appPath: " & appPath buttons {"OK"} default button "OK" -- デバッグ用
 
--- dataフォルダのパスを取得
+-- 親フォルダのパスを取得
+try
+    set appFolder to (container of (appPath as alias))
+    set appFolderPath to POSIX path of appFolder
+    display dialog "appFolderPath: " & appFolderPath buttons {"OK"} default button "OK" -- デバッグ用
+on error errMsg
+    display dialog "Failed to get container: " & errMsg buttons {"OK"} default button "OK"
+    return -- エラー時に終了
+end try
+
+-- dataフォルダのパスを構築
 set dataFolderPath to appFolderPath & "data/notify/"
+
+-- data/notify/ フォルダが存在するか確認し、なければ作成
+tell application "System Events"
+    if not (exists folder dataFolderPath) then
+        make new folder at appFolderPath with properties {name: "data"}
+        make new folder at (appFolderPath & "data/") with properties {name: "notify"}
+    end if
+end tell
 
 -- 出力するファイルパスを指定
 set filePath to dataFolderPath & "_mac.txt"
