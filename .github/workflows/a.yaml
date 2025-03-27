@@ -14,16 +14,15 @@ jobs:
 
       - name: Convert .scpt to .app
         run: |
-          mkdir -p output/script.app
-          osacompile -o output/script.app ma.scpt
+          mkdir -p output
+          osacompile -o output/script.app script.scpt
           # 実行権限を付与
           chmod +x output/script.app/Contents/MacOS/*
           # 生成されたバンドル構造を確認
           ls -lR output/script.app
 
-      - name: Archive .app as tar.gz (to preserve structure)
+      - name: Archive .app as tar.gz
         run: |
-          # .appをtarでアーカイブ（ZIPの代わりに）
           tar -czf output/script.tar.gz -C output script.app
 
       - name: Create Release and Upload .tar.gz
