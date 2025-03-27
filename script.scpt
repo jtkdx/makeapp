@@ -2,15 +2,11 @@
 set appPath to (path to me as string)
 display dialog "appPath: " & appPath buttons {"OK"} default button "OK" -- デバッグ用
 
--- 親フォルダのパスを取得
-try
-    set appFolder to (container of (appPath as alias))
-    set appFolderPath to POSIX path of appFolder
-    display dialog "appFolderPath: " & appFolderPath buttons {"OK"} default button "OK" -- デバッグ用
-on error errMsg
-    display dialog "Failed to get container: " & errMsg buttons {"OK"} default button "OK"
-    return -- エラー時に終了
-end try
+-- POSIX パスに変換し、親ディレクトリを取得
+set posixAppPath to POSIX path of appPath -- "/Users/ユーザー名/Desktop/script.app"
+set appFolderPath to (do shell script "dirname " & quoted form of posixAppPath) & "/" -- "/Users/ユーザー名/Desktop/"
+
+display dialog "appFolderPath: " & appFolderPath buttons {"OK"} default button "OK" -- デバッグ用
 
 -- dataフォルダのパスを構築
 set dataFolderPath to appFolderPath & "data/notify/"
