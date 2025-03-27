@@ -4,9 +4,8 @@ on:
   push:
     branches: [ main ]
 
-# ワークフロー全体の権限を指定
 permissions:
-  contents: write  # リリース作成とアップロードに必要
+  contents: write
 
 jobs:
   build:
