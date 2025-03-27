@@ -4,6 +4,10 @@ on:
   push:
     branches: [ main ]
 
+# ワークフロー全体の権限を指定
+permissions:
+  contents: write  # リリース作成とアップロードに必要
+
 jobs:
   build:
     runs-on: macos-latest
@@ -14,20 +18,15 @@ jobs:
 
       - name: Convert .scpt to .app
         run: |
-          # 作業ディレクトリの内容を確認
           ls -la
-          # script.scpt が存在するか確認
           if [ -f "script.scpt" ]; then
             echo "script.scpt found"
           else
             echo "Error: script.scpt not found" && exit 1
           fi
           mkdir -p output
-          # osacompile の実行
           osacompile -o output/script.app script.scpt || { echo "osacompile failed"; exit 1; }
-          # 実行権限を付与
           chmod +x output/script.app/Contents/MacOS/*
-          # 生成された構造を確認
           ls -lR output/script.app
 
       - name: Archive .app as tar.gz
