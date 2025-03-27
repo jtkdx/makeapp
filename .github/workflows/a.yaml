@@ -1,1 +1,32 @@
+name: Convert SCPT to APP
 
+# ワークフローがトリガーされる条件
+on:
+  push:
+    branches: [ main ]  # 'main'ブランチへのプッシュで実行
+
+# ジョブの定義
+jobs:
+  build:
+    # macOS環境を使用（AppleScriptはmacOSでのみ動作）
+    runs-on: macos-latest
+
+    steps:
+      # リポジトリをチェックアウト
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      # .scptファイルを.appに変換
+      - name: Convert .scpt to .app
+        run: |
+          # 出力ディレクトリを作成
+          mkdir -p output
+          # osacompileで変換（script.scptをscript.appに）
+          osacompile -o output/ma.app ma.scpt
+
+      # 変換した.appをアーティファクトとしてアップロード（任意）
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: script-app
+          path: output/ma.app
