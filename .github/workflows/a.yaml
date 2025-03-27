@@ -1,32 +1,35 @@
-name: Convert SCPT to APP
+name: Convert SCPT to APP and Release
 
-# ワークフローがトリガーされる条件
 on:
   push:
-    branches: [ main ]  # 'main'ブランチへのプッシュで実行
+    branches: [ main ]
 
-# ジョブの定義
 jobs:
   build:
-    # macOS環境を使用（AppleScriptはmacOSでのみ動作）
     runs-on: macos-latest
 
     steps:
-      # リポジトリをチェックアウト
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      # .scptファイルを.appに変換
       - name: Convert .scpt to .app
         run: |
-          # 出力ディレクトリを作成
-          mkdir -p output
-          # osacompileで変換（script.scptをscript.appに）
-          osacompile -o output/ma.app ma.scpt
+          mkdir -p output/script.app
+          osacompile -o output/script.app ma.scpt
+          # 実行権限を付与
+          chmod +x output/script.app/Contents/MacOS/*
+          # 生成されたバンドル構造を確認
+          ls -lR output/script.app
 
-      # 変換した.appをアーティファクトとしてアップロード（任意）
-      - name: Upload artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: script-app
-          path: output/ma.app
+      - name: Archive .app as tar.gz (to preserve structure)
+        run: |
+          # .appをtarでアーカイブ（ZIPの代わりに）
+          tar -czf output/script.tar.gz -C output script.app
+
+      - name: Create Release and Upload .tar.gz
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          TAG_NAME="v$(date +%Y%m%d%H%M%S)"
+          gh release create "$TAG_NAME" --title "Release $TAG_NAME" --notes "Converted .app file" --draft
+          gh release upload "$TAG_NAME" output/script.tar.gz
